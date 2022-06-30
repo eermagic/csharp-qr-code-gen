@@ -1,0 +1,88 @@
+﻿<div id="VuePage">
+    <div class="page-header">
+        <h1>QR Code 製作與 Base 32 編碼應用<small>[教學範例]</small></h1>
+    </div>
+    <div class="form-group">
+        <label for="OriText">原始明文</label>
+        <input type="text" class="form-control" v-model="form.OriText">
+    </div>
+    <button type="button" class="btn btn-primary" v-on:click="DoUrlEncode()">產生編碼網址</button>
+    <div class="form-group">
+        <label for="OriText">已編碼網址</label>
+        <input type="text" class="form-control" v-model="form.UrlEnText">
+    </div>
+    <button type="button" class="btn btn-primary" v-on:click="DoGenQRCode()">轉成 QR Code</button>
+    <div class="form-group">
+        <label for="OriText">輸出 QR Code</label><br />
+        <img class="img-thumbnail" style="width: 300px;height:300px;" v-bind:src="form.QrCodePath">
+    </div>
+</div>
+@section scripts {
+    <script>
+        var VuePage = new Vue({
+            el: '#VuePage'
+            , data: function () {
+                var data = {
+                    form: {
+                        OriText: ""
+                        , UrlEnText: ""
+                        , QrCodePath: ""
+                    }
+                };
+                return data;
+            }
+            , methods: {
+                // 產生編碼網址
+                DoUrlEncode: function () {
+                    var self = this;
+                    // 組合表單資料
+                    var postData = {};
+                    postData['OriText'] = self.form.OriText;
+
+                    // 使用 jQuery Ajax 傳送至後端
+                    $.ajax({
+                        url:'@Url.Action("DoUrlEncode", "Home")',
+                        method:'POST',
+                        dataType:'json',
+                        data: { inModel: postData },
+                        success: function (datas) {
+                            if (datas.ErrMsg) {
+                                alert(datas.ErrMsg);
+                                return;
+                            }
+                            self.form.UrlEnText = datas.UrlEnText;
+                        },
+                        error: function (err) {
+                            alert(err.responseText);
+                        }
+                    });
+                }
+                // 轉成 QR Code
+                , DoGenQRCode: function () {
+                    var self = this;
+                    // 組合表單資料
+                    var postData = {};
+                    postData['UrlEnText'] = self.form.UrlEnText;
+
+                    // 使用 jQuery Ajax 傳送至後端
+                    $.ajax({
+                        url:'@Url.Action("DoGenQRCode", "Home")',
+                        method:'POST',
+                        dataType:'json',
+                        data: { inModel: postData },
+                        success: function (datas) {
+                            if (datas.ErrMsg) {
+                                alert(datas.ErrMsg);
+                                return;
+                            }
+                            self.form.QrCodePath = datas.QRCodeWebPath;
+                        },
+                        error: function (err) {
+                            alert(err.responseText);
+                        }
+                    });
+                }
+            }
+        })
+    </script>
+}
